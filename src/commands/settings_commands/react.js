@@ -37,7 +37,7 @@ function react (data)
             return logger(
                "error",
                err,
-               "command",
+               "react",
                data.message.channel.guild.name
             );
 
@@ -84,7 +84,7 @@ module.exports = function run (data)
    // Command allowed by admins only
    // -------------------------------
 
-   if (data.message.isAdmin === false)
+   if (!data.message.isAdmin)
    {
 
       {

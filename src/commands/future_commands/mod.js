@@ -1,9 +1,9 @@
-/* eslint-disable consistent-return */
 // -----------------
 // Global variables
 // -----------------
 
 // Codebeat:disable[LOC,ABC,BLOCK_NESTING,ARITY]
+/* eslint-disable consistent-return */
 const sendMessage = require("../../core/command.send");
 
 // ----
@@ -158,6 +158,33 @@ module.exports.unmute = function unmute (data)
 
 };
 
+// -------------
+// Delete by ID
+// -------------
+
+module.exports.deleteid = function deleteid (data)
+{
+
+   // -------------
+   // Command Code
+   // -------------
+
+   // console.log("DEBUG: Delete Message by ID");
+
+   const msgID = data.cmd.num;
+   data.message.delete().catch((err) => console.log(
+      "DEBUG: Command Message Deleted By ID Error 1, Mod.js = ",
+      err
+   ));
+   if (data.message.isDev)
+   {
+
+      return data.message.guild.channels.cache.get(data.message.channel.id).messages.fetch(msgID).then((message) => message.delete());
+
+   }
+
+};
+
 // -----
 // Kick
 // -----
@@ -226,7 +253,12 @@ module.exports.kick = function kick (data)
       }
 
    }
-   data.text = ":cop:  This command is reserved for server admins and owners only.\n";
-   return sendMessage(data);
+   else
+   {
+
+      data.text = ":cop:  This command is reserved for server admins and owners only.\n";
+      return sendMessage(data);
+
+   }
 
 };

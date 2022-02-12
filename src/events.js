@@ -4,8 +4,8 @@
 // -----------------
 
 // Codebeat:disable[LOC,ABC,BLOCK_NESTING]
-const stripIndent = require("common-tags").stripIndent;
-const oneLine = require("common-tags").oneLine;
+const {stripIndent} = require("common-tags");
+const {oneLine} = require("common-tags");
 const auth = require("./core/auth");
 const logger = require("./core/logger");
 const messageHandler = require("./message");
@@ -49,7 +49,6 @@ exports.listen = function listen (client)
             "maxEmbeds": 5,
             "maxMulti": 6,
             "maxTasksPerChannel": 15,
-            "owner": auth.botOwner,
             "translateCmd": "!translate",
             "translateCmdShort": "!tr",
             "version": botVersion
@@ -58,7 +57,7 @@ exports.listen = function listen (client)
          if (!process.env.DISCORD_BOT_OWNER_ID)
          {
 
-            process.env.DISCORD_BOT_OWNER_ID = [];
+            process.env.DISCORD_BOT_OWNER_ID = "0";
 
          }
 
@@ -147,18 +146,6 @@ exports.listen = function listen (client)
                   console.log(`MD1: ${message.guild.name} - ${message.guild.id} - ${message.createdAt}`);
 
                }
-               const col = "message";
-               let id = "bot";
-               db.increaseStatsCount(col, id);
-
-               if (message.channel.type === "text")
-               {
-
-                  id = message.channel.guild.id;
-
-               }
-
-               db.increaseStatsCount(col, id);
                // Need to have another if statment here, if server length is greeater than 1 then run below, if not do nothing.
                // SetStatus(client.user, "online", config);
 
@@ -251,37 +238,24 @@ exports.listen = function listen (client)
 
    process.on(
       "uncaughtException",
-      (err) =>
-      {
-
-         logger(
-            "dev",
-            err
-         );
-         return logger(
-            "error",
-            err,
-            "uncaught"
-         );
-
-      }
+      (err) => logger(
+         "dev",
+         err
+      )
    );
 
    process.on(
       "unhandledRejection",
-      (reason) =>
+      (reason, promise) =>
       {
 
+         // console.error("DEBUG: Unhandled promise rejection:", reason);
          const err = `${`Unhandled Rejection` +
-           `\nCaused By:\n`}${reason.stack}`;
-         logger(
+           `\nCaused By:\n`}${reason.stack}` +
+           `\n${`Promise At:\n`}${promise.stack} `;
+         return logger(
             "dev",
             err
-         );
-         return logger(
-            "error",
-            err,
-            "unhandled",
          );
 
       }
@@ -289,20 +263,10 @@ exports.listen = function listen (client)
 
    process.on(
       "warning",
-      (warning) =>
-      {
-
-         logger(
-            "dev",
-            warning
-         );
-         return logger(
-            "error",
-            warning,
-            "warning"
-         );
-
-      }
+      (warning) => logger(
+         "dev",
+         warning
+      )
    );
 
    // ---------------------------
@@ -352,7 +316,7 @@ exports.listen = function listen (client)
             if (err)
             {
 
-               return console.log("error", err, "command", guild.id);
+               return console.log("error", err, "leave", guild.id);
 
             }
 
@@ -395,7 +359,7 @@ exports.listen = function listen (client)
 
                console.log(`Server: ${guild.id} has a blacklisted status of: ${server[0].blacklisted}`);
                logger(
-                  "custom",
+                  "activity",
                   {
                      "color": "ok",
                      "msg": oneLine`**Server:** ${guild.id} has a blacklisted status of: **${server[0].blacklisted}**`
@@ -406,14 +370,14 @@ exports.listen = function listen (client)
                {
 
                   logger(
-                     "custom",
+                     "activity",
                      {
                         "color": "warn",
                         "msg": oneLine`**Server:** ${guild.id} has been kicked as it is blacklisted`
                      }
                   );
 
-                  await guild.leave();
+                  await guild.leave().catch((err) => console.log(`DEBUG: Blacklisted Error ${err}`));
 
                }
 
@@ -427,7 +391,7 @@ exports.listen = function listen (client)
             if (err)
             {
 
-               return console.log("error", err, "command", guild.id);
+               return console.log("error", err, "join", guild.id);
 
             }
 
